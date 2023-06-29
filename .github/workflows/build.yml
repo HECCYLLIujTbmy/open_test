@@ -22,7 +22,9 @@ jobs:
     - name: Create artifact
       run: |
         cd output
+        stat result.txt
         tar -cvzf result.tar.gz result.txt
+        stat result.tar.gz
         mv result.txt result.deb
       if: always()
 
