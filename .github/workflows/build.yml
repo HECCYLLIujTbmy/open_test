@@ -1,36 +1,30 @@
-name: Build and Package
+name: Docker actions
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v2
-
+    
     - name: Build and run Docker container
       run: |
-        docker build -t mycontainer .
-        docker run -v $(pwd)/output:/output mycontainer
+        docker build -t my-container .
+        docker run -d --name my-app my-container
         
-    - name: Change permissions
+    - name: Execute command in Docker container
       run: |
-        sudo chmod -R 777 output/
+        docker exec my-app /bin/ss -tulpn
+        docker exec my-app ping -c 3 google.com > result.txt
         
-    - name: Create artifact
-      run: |
-        cd output
-        stat result.txt
-        tar -cvzf result.tar.gz result.txt
-        stat result.tar.gz
-        mv result.txt result.deb
-      if: always()
-
-    - name: Upload artifact
+    - name: Copy result file as artifact
       uses: actions/upload-artifact@v2
       with:
-        name: result-artifact
-        path: output/result.tar.gz
-        if-no-files-found: error
+        name: result.txt
+        path: result.txt
